@@ -1,0 +1,1 @@
+while (dog__segment<=printread_segment) assign dog__segment+1 to dog__segment

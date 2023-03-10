@@ -1,0 +1,15 @@
+/* comment **/
+read[x,y,z];
+while (> x 0)
+	conditional [
+		option (> x y) do {assign - x z to x; print[x]}
+		option (== x y) do {assign 0 to x; print[x]}
+	]
+	else {assign - x 1 to x; print[x]}
+	end;
+assign 10 to a,b;
+print[y,*(+(a,b,1),b,5)]
+
+/*
+
+*/

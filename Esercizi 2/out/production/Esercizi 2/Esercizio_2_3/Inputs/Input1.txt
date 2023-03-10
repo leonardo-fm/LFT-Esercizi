@@ -1,0 +1,4 @@
+/* Test */
+// assign 300 to _d;
+assign 300 to _d;
+/* Test */

@@ -1,0 +1,29 @@
+assign 10 to x;
+assign 20 to y;
+assign 30 to z;
+print[+(x,*(y,z))]
+
+/*
+ ldc 10
+ istore 0
+ goto L1
+L1:
+ ldc 20
+ istore 1
+ goto L2
+L2:
+ ldc 30
+ istore 2
+ goto L3
+L3:
+ iload 0
+ iload 1
+ iload 2
+ imul
+ iadd
+ invokestatic Output/print(I)V
+ goto L4
+L4:
+ goto L0
+L0:
+*/

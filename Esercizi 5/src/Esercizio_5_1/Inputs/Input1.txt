@@ -1,0 +1,17 @@
+read[a];
+print[+(a,1)]
+
+/*
+ invokestatic Output/read()I
+ istore 0
+ goto L1
+L1:
+ iload 0
+ ldc 1
+ iadd
+ invokestatic Output/print(I)V
+ goto L2
+L2:
+ goto L0
+L0:
+*/

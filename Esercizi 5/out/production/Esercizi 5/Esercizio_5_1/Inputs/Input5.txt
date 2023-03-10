@@ -1,0 +1,84 @@
+assign 10 to a,b;
+print[a,b];
+read[x,y];
+print[1,+(2,3,4)];
+conditional [
+	option (> x y) do print[x]
+	option (== x y) do print[x,y]
+	]
+	else print[y] end;
+while (> x 0) {
+	assign - x 1 to x;
+	print[x]
+}
+
+/*
+ldc 10
+ istore 0
+ iload 1
+ istore 1
+ goto L1
+L1:
+ iload 0
+ iload 1
+ invokestatic Output/print(I)V
+ goto L2
+L2:
+ invokestatic Output/read()I
+ istore 2
+ invokestatic Output/read()I
+ istore 3
+ goto L3
+L3:
+ ldc 1
+ ldc 2
+ ldc 3
+ ldc 4
+ iadd
+ iadd
+ invokestatic Output/print(I)V
+ goto L4
+L4:
+ iload 2
+ iload 3
+ if_icmpgt L5
+ goto L5
+L5:
+ iload 2
+ invokestatic Output/print(I)V
+ iload 2
+ iload 3
+ if_icmpeq L5
+ goto L5
+L5:
+ iload 2
+ iload 3
+ invokestatic Output/print(I)V
+ goto L5
+L5:
+ iload 3
+ invokestatic Output/print(I)V
+ goto L6
+L6:
+ iload 2
+ ldc 0
+ if_icmpgt L7
+ goto L6
+ goto L7
+L7:
+ iload 2
+ ldc 1
+ isub
+ istore 2
+ goto L9
+L9:
+ iload 2
+ invokestatic Output/print(I)V
+ goto L10
+L10:
+ goto L8
+ goto L11
+L11:
+ goto L0
+L0:
+*/
