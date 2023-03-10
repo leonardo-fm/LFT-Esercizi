@@ -32,83 +32,10 @@
  .limit locals 256
  invokestatic Output/read()I
  istore 0
- invokestatic Output/read()I
- istore 1
- invokestatic Output/read()I
- istore 2
- goto L1
-L1:
- iload 0
- ldc 0
- if_icmpgt L2
- goto L1
- goto L2
-L2:
- iload 0
- iload 1
- if_icmpgt L3
- goto L3
-L3:
- iload 0
- iload 2
- isub 
- istore 0
- goto L5
-L5:
- iload 0
- invokestatic Output/print(I)V
- goto L6
-L6:
- goto L4
- iload 0
- iload 1
- if_icmpeq L3
- goto L3
-L3:
- ldc 0
- istore 0
- goto L8
-L8:
- iload 0
- invokestatic Output/print(I)V
- goto L9
-L9:
- goto L7
- goto L3
-L3:
  iload 0
  ldc 1
- isub 
- istore 0
- goto L11
-L11:
- iload 0
- invokestatic Output/print(I)V
- goto L12
-L12:
- goto L10
- goto L13
-L13:
- ldc 10
- istore 3
- iload 4
- istore 4
- goto L14
-L14:
- iload 1
- iload 3
- iload 4
- ldc 1
  iadd 
- iadd 
- iload 4
- ldc 5
- imul 
- imul 
  invokestatic Output/print(I)V
- goto L15
-L15:
- goto L0
 L0:
  return
 .end method

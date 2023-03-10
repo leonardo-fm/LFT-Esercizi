@@ -8,16 +8,12 @@ print[+(x,*(y,z))]
  istore 1
  invokestatic Output/read()I
  istore 2
- goto L1
-L1:
  iload 0
  iload 1
  iload 2
  imul
  iadd
  invokestatic Output/print(I)V
- goto L2
-L2:
- goto L0
 L0:
+ return
 */

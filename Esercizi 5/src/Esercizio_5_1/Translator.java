@@ -28,7 +28,7 @@ public class Translator {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = System.getProperty("user.dir") + "\\src\\Esercizio_5_1\\Inputs\\Input6.txt";
+        String path = System.getProperty("user.dir") + "\\src\\Esercizio_5_1\\Inputs\\Input1.txt";
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Translator translator = new Translator(lex, br);
@@ -66,22 +66,15 @@ public class Translator {
 
     private void statlist(int lnext_prog) {
         start(lnext_prog);
-        statlistp();
-        int n_label = code.newLabel();
-        code.emit(OpCode.GOto, n_label);
-        code.emitLabel(n_label);
-        code.emit(OpCode.GOto, lnext_prog); // TODO rivedere qui mi sembra na cazzata
+        statlistp(lnext_prog);
     }
 
-    private void statlistp() {
+    private void statlistp(int lnext_prog) {
         switch (look.tag) {
             case ';':
                 match(';');
-                int n_label = code.newLabel();
-                code.emit(OpCode.GOto, n_label);
-                code.emitLabel(n_label);
-                start(n_label);
-                statlistp();
+                if (look.tag != '}')
+                    statlist(lnext_prog);
                 break;
             default:
                 break;
@@ -101,9 +94,8 @@ public class Translator {
             case Tag.PRINT:
                 match(Tag.PRINT);
                 match('[');
-                exprlist(null);
+                exprlist(OpCode.invokestatic, 1);
                 match(']');
-                code.emit(OpCode.invokestatic, 1);
                 break;
             case Tag.READ:
                 code.emit(OpCode.invokestatic, 0);
@@ -113,15 +105,19 @@ public class Translator {
                 match(']');
                 break;
             case Tag.WHILE:
-                n_label = code.newLabel();
                 match(Tag.WHILE);
                 match('(');
-                bexpr(n_label);
-                code.emit(OpCode.GOto, lnext_prog);
-                match(')');
-                code.emit(OpCode.GOto, n_label);
+                n_label = code.newLabel();
                 code.emitLabel(n_label);
-                start(n_label);
+                int codFrag_label = code.newLabel();
+                int codExit = code.newLabel();
+                bexpr(codFrag_label);
+                code.emit(OpCode.GOto, codExit);
+                match(')');
+                code.emitLabel(codFrag_label);
+                start(codFrag_label);
+                code.emit(OpCode.GOto, n_label);
+                code.emitLabel(codExit);
                 break;
             case Tag.COND:
                 n_label = code.newLabel();
@@ -133,23 +129,21 @@ public class Translator {
                 switch (look.tag) {
                     case Tag.END:
                         match(Tag.END);
-                        code.emitLabel(n_label);
                         break;
                     case Tag.ELSE:
                         match(Tag.ELSE);
-                        code.emit(OpCode.GOto, n_label);
-                        code.emitLabel(n_label);
                         start(n_label);
                         match(Tag.END);
                         break;
                     default:
                         error("syntax error");
                 }
+
+                code.emitLabel(n_label);
                 break;
             case '{':
-                n_label = code.newLabel();
                 match('{');
-                statlist(n_label);
+                statlist(lnext_prog);
                 match('}');
                 break;
             default:
@@ -176,7 +170,7 @@ public class Translator {
                 match(',');
                 switch (ref_tok.tag) {
                     case Tag.ASSIGN:
-                        code.emit(OpCode.iload, count);
+                        code.emit(OpCode.iload, count - 1);
                         break;
                     case Tag.READ:
                         code.emit(OpCode.invokestatic, 0);
@@ -193,32 +187,38 @@ public class Translator {
     }
 
     private void optlist(int lnext_prog) {
-        optitem(lnext_prog);
+        int n_label = optitem(lnext_prog);
+        code.emitLabel(n_label);
         optlistp(lnext_prog);
+
     }
 
     private void optlistp(int lnext_prog) {
         if(look.tag == Tag.OPTION) {
-            optitem(lnext_prog);
-            optlistp(lnext_prog);
+            optlist(lnext_prog);
         }
     }
 
-    private void optitem(int lnext_prog) {
+    private int optitem(int lnext_prog) {
+        int next_check_label = code.newLabel();
         switch (look.tag) {
             case Tag.OPTION:
                 match(Tag.OPTION);
+                int codFrag_label = code.newLabel();
                 match('(');
-                bexpr(lnext_prog);
+                bexpr(codFrag_label);
+                code.emit(OpCode.GOto, next_check_label);
                 match(')');
                 match(Tag.DO);
+                code.emitLabel(codFrag_label);
+                start(codFrag_label);
                 code.emit(OpCode.GOto, lnext_prog);
-                code.emitLabel(lnext_prog);
-                start(lnext_prog);
                 break;
             default:
                 error("syntax error");
         }
+
+        return next_check_label;
     }
 
     private void bexpr(int lnext_prog) {
@@ -270,7 +270,7 @@ public class Translator {
             case '+':
                 match('+');
                 match('(');
-                exprlist(OpCode.iadd);
+                exprlist(OpCode.iadd, -1);
                 match(')');
                 break;
             case '-':
@@ -282,7 +282,7 @@ public class Translator {
             case '*':
                 match('*');
                 match('(');
-                exprlist(OpCode.imul);
+                exprlist(OpCode.imul, -1);
                 match(')');
                 break;
             case '/':
@@ -304,19 +304,24 @@ public class Translator {
         }
     }
 
-    private void exprlist(OpCode op_code) {
+    private void exprlist(OpCode op_code, int operandId) {
         expr();
-        exprlistp(op_code);
+        if (op_code == OpCode.invokestatic)
+            code.emit(op_code, operandId);
+        exprlistp(op_code, operandId);
     }
 
-    private void exprlistp(OpCode op_code) {
+    private void exprlistp(OpCode op_code, int operandId) {
         switch (look.tag) {
             case ',':
                 match(',');
                 expr();
-                exprlistp(op_code);
+                exprlistp(op_code, operandId);
                 if (op_code != null)
-                    code.emit(op_code);
+                    if (operandId != -1)
+                        code.emit(op_code, operandId);
+                    else
+                        code.emit(op_code);
                 break;
             default:
                 break;
