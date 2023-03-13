@@ -1,0 +1,18 @@
+assign 10 to a,b;
+assign 20 to a,y;
+print[y]
+
+/*
+ ldc 10
+ istore 0
+ iload 0
+ istore 1
+ ldc 20
+ istore 0
+ iload 0
+ istore 2
+ iload 2
+ invokestatic Output/print(I)V
+L0:
+ return
+*/

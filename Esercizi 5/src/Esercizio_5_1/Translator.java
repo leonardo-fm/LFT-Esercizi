@@ -28,7 +28,7 @@ public class Translator {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = System.getProperty("user.dir") + "\\src\\Esercizio_5_1\\Inputs\\Input1.txt";
+        String path = System.getProperty("user.dir") + "\\src\\Esercizio_5_1\\Inputs\\Input11.txt";
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Translator translator = new Translator(lex, br);
@@ -74,7 +74,8 @@ public class Translator {
             case ';':
                 match(';');
                 if (look.tag != '}')
-                    statlist(lnext_prog);
+                    start(lnext_prog);
+                    statlistp(lnext_prog);
                 break;
             default:
                 break;
@@ -157,29 +158,29 @@ public class Translator {
                 int id_addr = addInMemory();
                 code.emit(OpCode.istore, id_addr);
                 match(Tag.ID);
-                idlistp(ref_tok);
+                idlistp(ref_tok, id_addr);
                 break;
             default:
                 error("syntax error");
         }
     }
 
-    private void idlistp(Token ref_tok) {
+    private void idlistp(Token ref_tok, int id_addr) {
         switch (look.tag) {
             case ',':
                 match(',');
                 switch (ref_tok.tag) {
                     case Tag.ASSIGN:
-                        code.emit(OpCode.iload, count - 1);
+                        code.emit(OpCode.iload, id_addr);
                         break;
                     case Tag.READ:
                         code.emit(OpCode.invokestatic, 0);
                         break;
                 }
-                int id_addr = addInMemory();
+                id_addr = addInMemory();
                 code.emit(OpCode.istore, id_addr);
                 match(Tag.ID);
-                idlistp(ref_tok);
+                idlistp(ref_tok, id_addr);
                 break;
             default:
                 break;
@@ -190,12 +191,13 @@ public class Translator {
         int n_label = optitem(lnext_prog);
         code.emitLabel(n_label);
         optlistp(lnext_prog);
-
     }
 
     private void optlistp(int lnext_prog) {
         if(look.tag == Tag.OPTION) {
-            optlist(lnext_prog);
+            int n_label = optitem(lnext_prog);
+            code.emitLabel(n_label);
+            optlistp(lnext_prog);
         }
     }
 
@@ -316,12 +318,15 @@ public class Translator {
             case ',':
                 match(',');
                 expr();
-                exprlistp(op_code, operandId);
-                if (op_code != null)
-                    if (operandId != -1)
+                if (op_code != null) {
+                    if (operandId != -1) {
                         code.emit(op_code, operandId);
-                    else
+                    }
+                    else {
                         code.emit(op_code);
+                    }
+                }
+                exprlistp(op_code, operandId);
                 break;
             default:
                 break;

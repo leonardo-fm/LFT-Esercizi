@@ -1,0 +1,16 @@
+print[1,2,3,4,5][
+
+/*
+ ldc 1
+ invokestatic Output/print(I)V
+ ldc 2
+ invokestatic Output/print(I)V
+ ldc 3
+ invokestatic Output/print(I)V
+ ldc 4
+ invokestatic Output/print(I)V
+ ldc 5
+ invokestatic Output/print(I)V
+L0:
+ return
+*/
